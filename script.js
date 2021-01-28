@@ -1,363 +1,236 @@
-let nama, val;
-const url_string = document.URL;
-const url = new URL(url_string);
-let sender;
+(function ($){
+    $.fn.typewrite = function(options){
+        // setup defaults
+        var settings = $.extend({
+            speed: 12,
+            blinkSpeed: 2,
+            showCursor: true,
+            blinkingCursor: true,
+            cursor: '_',
+            selectedBackground: '#F1F1F1',
+            selectedText: '#333333',
+            continuous: false
+        }, options);
 
-if (url.searchParams.get('by') != null) {
-  sender = url.searchParams.get('by');
-} else {
-  sender = "Naufal";
-}
+        // set the blink speed of the cursor
+        settings.blinkSpeed = 1000 / settings.blinkSpeed;
 
-
-document.querySelector(".tombol").addEventListener('click', function () {
-  Swal.fire("Hallo Rani", "Apasi yang berkesan di 2020", "question").then(function () {
-    Swal.fire("Minta waktunya sebentar ya").then(function () {
-      Swal.fire("Karna gabisa kerumah jadi lewat sini aja ya", "", "error").then(function () {
-
-        const {
-          value: name
-        } = Swal.fire({
-          title: 'Absen dulu ya',
-          input: 'text',
-          inputLabel: '',
-          showCancelButton: true,
-          inputValidator: (value) => {
-            if (!value) {
-              return 'Isi dulu dong barbie'
-            } else {
-              nama = value;
+        // add cursor if set to true.
+        if(settings.showCursor){
+            $(this).html('<span></span><span class="blinkingCursor">' + settings.cursor + '</span>');
+            if(settings.blinkingCursor){
+                // cache cursor object
+                var $cursor = $('.blinkingCursor');
+                setInterval(function(){
+                    // check if blinkingCursor is set to opacity
+                    if(settings.blinkingCursor === 'opacity'){
+                        // toggle cursor opacity
+                        if($cursor.css('opacity') === '1'){ 
+                            $cursor.css({'opacity': 0});
+                        }else{
+                            $cursor.css({'opacity': 1});
+                        }
+                    }else{
+                        // default to show/hide
+                        $cursor.toggle();
+                    }
+                }, settings.blinkSpeed);
             }
-          }
-        }).then(function () {
-          const pertanyaan = Swal.fire({
-            title: `Moment paling berkesan buat ${nama} di 2020 apa?`,
-            input: 'text',
-            inputLabel: '',
-            showDenyButton: true,
-            confirmButtonText: `Send`,
-          }).then((result) => {
-            /* Read more about isConfirmed*/
-              Swal.fire({
-                title: 'Seberapa berkesannya tahun 2020?',
-                icon: 'question',
-                input: 'range',
-                inputLabel: 'Antara 1 - 100 ya',
-                inputAttributes: {
-                  min: 1,
-                  max: 100,
-                  step: 1
-                },
-                inputValue: 50
-              }).then((e) => {
-                val = e.value
-                Swal.fire(`Ternyata ${val}% ya`).then(function () {
-                  Swal.fire({
-                    title: `Sekarang apa harapan ${nama} di 2021?`,
-                    input: 'text',
-                    inputLabel: '',
-                    showDenyButton: true,
-                    confirmButtonText: `Send`
-                  }).then((result) => {
-                    /* Read more about isConfirmed, isDenied below */
-                      Swal.fire(`Semoga harapan ${nama} tercapai ya`).then(function () {
-                        Swal.fire(`Sukses terus ${nama}`).then(function () {
-                          Swal.fire('Coba klik ikon hati di paling bawah dong')
-                        })
-                      })
-                  })
-                })
-              })       
-          })
-        })
-      });
-    });
-  });
-});
-
-
-document.querySelector('.hati').addEventListener('click', function () {
-  confetti();
-  const teks = document.getElementById('teks');
-  const btn = document.querySelector('.tombol');
-  teks.classList.remove('d-none')
-  btn.classList.add('d-none')
-  console.log(teks);
-  console.log(btn);
-})
-
-'use strict';
-
-// If set to true, the user must press
-// UP UP DOWN ODWN LEFT RIGHT LEFT RIGHT A B
-// to trigger the confetti with a random color theme.
-// Otherwise the confetti constantly falls.
-var onlyOnKonami = false;
-
-function confetti() {
-  // Globals
-  var $window = $(window),
-    random = Math.random,
-    cos = Math.cos,
-    sin = Math.sin,
-    PI = Math.PI,
-    PI2 = PI * 2,
-    timer = undefined,
-    frame = undefined,
-    confetti = [];
-
-  var runFor = 2000
-  var isRunning = true
-
-  setTimeout(() => {
-    isRunning = false
-  }, runFor);
-
-  // Settings
-  var konami = [38, 38, 40, 40, 37, 39, 37, 39, 66, 65],
-    pointer = 0;
-
-  var particles = 150,
-    spread = 20,
-    sizeMin = 5,
-    sizeMax = 12 - sizeMin,
-    eccentricity = 10,
-    deviation = 100,
-    dxThetaMin = -.1,
-    dxThetaMax = -dxThetaMin - dxThetaMin,
-    dyMin = .13,
-    dyMax = .18,
-    dThetaMin = .4,
-    dThetaMax = .7 - dThetaMin;
-
-  var colorThemes = [
-    function () {
-      return color(200 * random() | 0, 200 * random() | 0, 200 * random() | 0);
-    },
-    function () {
-      var black = 200 * random() | 0;
-      return color(200, black, black);
-    },
-    function () {
-      var black = 200 * random() | 0;
-      return color(black, 200, black);
-    },
-    function () {
-      var black = 200 * random() | 0;
-      return color(black, black, 200);
-    },
-    function () {
-      return color(200, 100, 200 * random() | 0);
-    },
-    function () {
-      return color(200 * random() | 0, 200, 200);
-    },
-    function () {
-      var black = 256 * random() | 0;
-      return color(black, black, black);
-    },
-    function () {
-      return colorThemes[random() < .5 ? 1 : 2]();
-    },
-    function () {
-      return colorThemes[random() < .5 ? 3 : 5]();
-    },
-    function () {
-      return colorThemes[random() < .5 ? 2 : 4]();
-    }
-  ];
-
-  function color(r, g, b) {
-    return 'rgb(' + r + ',' + g + ',' + b + ')';
-  }
-
-  // Cosine interpolation
-  function interpolation(a, b, t) {
-    return (1 - cos(PI * t)) / 2 * (b - a) + a;
-  }
-
-  // Create a 1D Maximal Poisson Disc over [0, 1]
-  var radius = 1 / eccentricity,
-    radius2 = radius + radius;
-
-  function createPoisson() {
-    // domain is the set of points which are still available to pick from
-    // D = union{ [d_i, d_i+1] | i is even }
-    var domain = [radius, 1 - radius],
-      measure = 1 - radius2,
-      spline = [0, 1];
-    while (measure) {
-      var dart = measure * random(),
-        i, l, interval, a, b, c, d;
-
-      // Find where dart lies
-      for (i = 0, l = domain.length, measure = 0; i < l; i += 2) {
-        a = domain[i], b = domain[i + 1], interval = b - a;
-        if (dart < measure + interval) {
-          spline.push(dart += a - measure);
-          break;
+        }else{
+            $(this).html('<span></span>');
         }
-        measure += interval;
-      }
-      c = dart - radius, d = dart + radius;
 
-      // Update the domain
-      for (i = domain.length - 1; i > 0; i -= 2) {
-        l = i - 1, a = domain[l], b = domain[i];
-        // c---d          c---d  Do nothing
-        //   c-----d  c-----d    Move interior
-        //   c--------------d    Delete interval
-        //         c--d          Split interval
-        //       a------b
-        if (a >= c && a < d)
-          if (b > d) domain[l] = d; // Move interior (Left case)
-          else domain.splice(l, 2); // Delete interval
-        else if (a < c && b > c)
-          if (b <= d) domain[i] = c; // Move interior (Right case)
-          else domain.splice(i, 0, c, d); // Split interval
-      }
+        // set the main element, not the span
+        settings.mainEl = this;
 
-      // Re-measure the domain
-      for (i = 0, l = domain.length, measure = 0; i < l; i += 2)
-        measure += domain[i + 1] - domain[i];
-    }
+        // add a span to hold our text
+        settings.el = $(this).children('span')[0];
 
-    return spline.sort();
-  }
+        // set the typing speed
+        settings.speed = 2000 / settings.speed;
 
-  // Create the overarching container
-  var container = document.createElement('div');
-  container.style.position = 'fixed';
-  container.style.top = '0';
-  container.style.left = '0';
-  container.style.width = '100%';
-  container.style.height = '0';
-  container.style.overflow = 'visible';
-  container.style.zIndex = '9999';
+        // holds the tags in an array
+        var actions = options.actions;
 
-  // Confetto constructor
-  function Confetto(theme) {
-    this.frame = 0;
-    this.outer = document.createElement('div');
-    this.inner = document.createElement('div');
-    this.outer.appendChild(this.inner);
+        // holds the queue of actions
+        settings.queue = actions.length;
 
-    var outerStyle = this.outer.style,
-      innerStyle = this.inner.style;
-    outerStyle.position = 'absolute';
-    outerStyle.width = (sizeMin + sizeMax * random()) + 'px';
-    outerStyle.height = (sizeMin + sizeMax * random()) + 'px';
-    innerStyle.width = '100%';
-    innerStyle.height = '100%';
-    innerStyle.backgroundColor = theme();
+        // trigger the 'typewriteStarted' event
+        $(settings.mainEl).trigger('typewriteStarted');
 
-    outerStyle.perspective = '50px';
-    outerStyle.transform = 'rotate(' + (360 * random()) + 'deg)';
-    this.axis = 'rotate3D(' +
-      cos(360 * random()) + ',' +
-      cos(360 * random()) + ',0,';
-    this.theta = 360 * random();
-    this.dTheta = dThetaMin + dThetaMax * random();
-    innerStyle.transform = this.axis + this.theta + 'deg)';
+        // execute the actions
+        processActions();
 
-    this.x = $window.width() * random();
-    this.y = -deviation;
-    this.dx = sin(dxThetaMin + dxThetaMax * random());
-    this.dy = dyMin + dyMax * random();
-    outerStyle.left = this.x + 'px';
-    outerStyle.top = this.y + 'px';
+        function processActions(){
+            actions.forEach(function(element, index){
+                // changes the typing speed
+                if(Object.keys(element).includes('speed')){
+                    settings.speed = 2000 / element.speed;
+                }
 
-    // Create the periodic spline
-    this.splineX = createPoisson();
-    this.splineY = [];
-    for (var i = 1, l = this.splineX.length - 1; i < l; ++i)
-      this.splineY[i] = deviation * random();
-    this.splineY[0] = this.splineY[l] = deviation * random();
+                // removes any previous selections
+                if(!Object.keys(element).includes('speed')){
+                    removeSelection();
+                }
 
-    this.update = function (height, delta) {
-      this.frame += delta;
-      this.x += this.dx * delta;
-      this.y += this.dy * delta;
-      this.theta += this.dTheta * delta;
+                // adds a delay to the sequence
+                if(Object.keys(element).includes('delay')){
+                    delay(element.delay);
+                }
 
-      // Compute spline and convert to polar
-      var phi = this.frame % 7777 / 7777,
-        i = 0,
-        j = 1;
-      while (phi >= this.splineX[j]) i = j++;
-      var rho = interpolation(
-        this.splineY[i],
-        this.splineY[j],
-        (phi - this.splineX[i]) / (this.splineX[j] - this.splineX[i])
-      );
-      phi *= PI2;
+                // removes characters
+                if(Object.keys(element).includes('remove')){
+                    remove(element.remove);
+                }
 
-      outerStyle.left = this.x + rho * cos(phi) + 'px';
-      outerStyle.top = this.y + rho * sin(phi) + 'px';
-      innerStyle.transform = this.axis + this.theta + 'deg)';
-      return this.y > height + deviation;
+                // adds a span which selects the text
+                if(Object.keys(element).includes('select')){
+                    select(element.select);
+                }
+
+                // types out text
+                if(Object.keys(element).includes('type')){
+                    if(element.type === '<br>'){
+                        newLine();
+                    }else{
+                        var text = $('<div/>').html(element.type).text();
+                        typeText(text, settings);
+                    }
+                }
+            });
+        }
+
+        var done = setInterval(function(){
+            if(settings.queue === 0){
+                clearInterval(done);
+                $(settings.mainEl).trigger('typewriteComplete');
+                if(settings.continuous){
+                    $(settings.el).empty();
+                    processActions();
+                }
+            }
+        }, 500);
+
+        // adds a wrapper span around given index of characters to mimick selecting the text
+        function select(action, callback){
+            var charLen = action.to - action.from;
+            var spanOpen = '<span class="typewriteSelected" style="background-color:' + settings.selectedBackground + '; color: ' + settings.selectedText + '">';
+            var blankstr = new Array(charLen + 1).join(' ');
+            var chars = blankstr.split('');
+            chars.forEach(function(char, index){
+                $(settings.el).delay(settings.speed).queue(function (next){
+                    var newIndex = index + 1;
+                    var newTo = action.to - newIndex;
+                    $(settings.el).html($(settings.el).html().replace(/<br.*?>/g, ' \n '));
+                    var currentString = $(settings.el).text();
+                    var firstPart = currentString.slice(0, newTo);
+                    var selectPart = currentString.slice(newTo, action.to);
+                    var lastPart = currentString.slice(action.to, currentString.length);
+                    var newString = firstPart + spanOpen + selectPart + '</span>' + lastPart;
+                    $(this).html(newString.replace(/ \n /g, '<br>'));
+                    next();
+
+                    // we are done, remove from queue
+                    if(index === chars.length - 1){
+                        settings.queue = settings.queue - 1;
+                        $(settings.mainEl).trigger('typewriteSelected', action);
+                    }
+                });
+            });
+        }
+
+        // pauses/delay
+        function delay(time){
+            $(settings.el).delay(time).queue(function (next){
+                next();
+
+                // we are done, remove from queue
+                settings.queue = settings.queue - 1;
+                $(settings.mainEl).trigger('typewriteDelayEnded');
+            });
+        }
+
+        // removes text. Can be stepped (one character at a time) or all in one hit
+        function remove(remove){
+            var blankstr = new Array(remove.num + 1).join(' ');
+            var chars = blankstr.split('');
+
+            // default to stepped
+            var removeType = typeof remove.type !== 'undefined' ? remove.type : 'stepped';
+
+            // if invalid, set to stepped
+            if(removeType !== 'stepped' && removeType !== 'whole'){
+                removeType = 'stepped';
+            }
+
+            if(removeType === 'stepped'){
+                chars.forEach(function(char, index){
+                    $(settings.el).delay(settings.speed).queue(function (next){
+                        $(settings.el).html($(settings.el).html().replace(/<br.*?>/g, ' \n '));
+                        var currText = $(this).text().substring(0, $(this).text().length - 1);
+                        $(this).html(currText.replace(/ \n /g, '<br>'));
+                        next();
+
+                        // we are done, remove from queue
+                        if(index === chars.length - 1){
+                            settings.queue = settings.queue - 1;
+                            $(settings.mainEl).trigger('typewriteRemoved', remove);
+                        }
+                    });
+                }, this);
+            }
+            if(removeType === 'whole'){
+                $(settings.el).delay(settings.speed).queue(function (next){
+                    $(settings.el).html($(settings.el).html().replace(/<br.*?>/g, ' \n '));
+                    var currText = $(this).text().substring(0, $(this).text().length - remove.num);
+                    $(this).html(currText.replace(/ \n /g, '<br>'));
+                    next();
+
+                    // we are done, remove from queue
+                    settings.queue = settings.queue - 1;
+                    $(settings.mainEl).trigger('typewriteRemoved', remove);
+                });
+            }
+        }
+
+        // types out the given text one character at a time
+        function typeText(text){
+            var chars = text.split('');
+            chars.forEach(function(char, index){
+                $(settings.el).delay(settings.speed).queue(function (next){
+                    var text = $(this).html() + char;
+                    $(this).html(text);
+                    next();
+
+                    // we are done, remove from queue
+                    if(index === chars.length - 1){
+                        settings.queue = settings.queue - 1;
+                        $(settings.mainEl).trigger('typewriteTyped', text);
+                    }
+                });
+            }, this);
+        }
+
+        // adds a new line <br> to the html
+        function newLine(){
+            $(settings.el).delay(settings.speed).queue(function (next){
+                var currTextNoCurr = $(this).html().substring(0, $(this).html().length);
+                $(this).html(currTextNoCurr + '<br>');
+                next();
+
+                // we are done, remove from queue
+                settings.queue = settings.queue - 1;
+                $(settings.mainEl).trigger('typewriteNewLine');
+            });
+        }
+
+        function removeSelection(){
+            // check selection exists
+            if($('.typewriteSelected').length > 0){
+                // removes selection
+                var selectionText = $('.typewriteSelected').text();
+                $('.typewriteSelected').replaceWith(selectionText);
+            }
+        }
     };
-  }
-
-
-  function poof() {
-    if (!frame) {
-      // Append the container
-      document.body.appendChild(container);
-
-      // Add confetti
-
-      var theme = colorThemes[onlyOnKonami ? colorThemes.length * random() | 0 : 0],
-        count = 0;
-
-      (function addConfetto() {
-
-        if (onlyOnKonami && ++count > particles)
-          return timer = undefined;
-
-        if (isRunning) {
-          var confetto = new Confetto(theme);
-          confetti.push(confetto);
-
-          container.appendChild(confetto.outer);
-          timer = setTimeout(addConfetto, spread * random());
-        }
-      })(0);
-
-
-      // Start the loop
-      var prev = undefined;
-      requestAnimationFrame(function loop(timestamp) {
-        var delta = prev ? timestamp - prev : 0;
-        prev = timestamp;
-        var height = $window.height();
-
-        for (var i = confetti.length - 1; i >= 0; --i) {
-          if (confetti[i].update(height, delta)) {
-            container.removeChild(confetti[i].outer);
-            confetti.splice(i, 1);
-          }
-        }
-
-        if (timer || confetti.length)
-          return frame = requestAnimationFrame(loop);
-
-        // Cleanup
-        document.body.removeChild(container);
-        frame = undefined;
-      });
-    }
-  }
-
-  $window.keydown(function (event) {
-    pointer = konami[pointer] === event.which ?
-      pointer + 1 :
-      +(event.which === konami[0]);
-    if (pointer === konami.length) {
-      pointer = 0;
-      poof();
-    }
-  });
-
-  if (!onlyOnKonami) poof();
-};
+}(jQuery));
